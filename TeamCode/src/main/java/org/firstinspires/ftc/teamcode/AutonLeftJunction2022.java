@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
-import java.util.List;
+
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -15,6 +15,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaCurrentGame;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.Tfod;
+
+import java.util.List;
 
 @Autonomous(name = "AutonLeftJunction2022")
 public class AutonLeftJunction2022 extends LinearOpMode {
@@ -31,7 +33,7 @@ public class AutonLeftJunction2022 extends LinearOpMode {
     private CRServo lift;
 
     int ParkPos;
-    int recognition;
+    Recognition recognition;
     double CountsPerInch;
     List<Recognition> recognitions;
     int index;
@@ -91,7 +93,7 @@ public class AutonLeftJunction2022 extends LinearOpMode {
         waitForStart();
         if (opModeIsActive()) {
             // Put run blocks here.
-            while (!recognitions) {
+            while (recognitions != null) {
                 // Put loop blocks here.
                 // Get a list of recognitions from TFOD.
                 recognitions = tfod.getRecognitions();
@@ -107,7 +109,20 @@ public class AutonLeftJunction2022 extends LinearOpMode {
                     for (Recognition recognition_item : recognitions) {
                         recognition = recognition_item;
                         // Display info.
-                        displayinfo(index);
+                        //displayinfo(index);
+
+                        telemetry.addData("label " , recognition_item.getLabel());
+                        telemetry.addData("Left, Top " , Double.parseDouble(JavaUtil.formatNumber(recognition_item.getLeft(), 0)) + ", " + Double.parseDouble(JavaUtil.formatNumber(recognition_item.getTop(), 0)));
+                        telemetry.addData("Right, Bottom " , Double.parseDouble(JavaUtil.formatNumber(recognition_item.getRight(), 0)) + ", " + Double.parseDouble(JavaUtil.formatNumber(recognition_item.getBottom(), 0)));
+                        if (recognition_item.getLabel().equals("1 Bolt")) {
+                            ParkPos = 1;
+                        } else if (recognition_item.getLabel().equals("2 Bulb")) {
+                            ParkPos = 2;
+                        } else if (recognition_item.getLabel().equals("3 Panel")) {
+                            ParkPos = 3;
+                        } else if (JavaUtil.listLength(recognitions) == 0) {
+                            ParkPos = 3;
+                        }
                         // Increment index.
                         index = index + 1;
                         callStop();
@@ -173,7 +188,7 @@ public class AutonLeftJunction2022 extends LinearOpMode {
         forward = 0;
         forward = 0;
         liftTime = 0;
-        recognition = 0;
+        //recognition = 0;
         strafe = 0;
         turn = 0;
         speed = 0;
@@ -183,7 +198,7 @@ public class AutonLeftJunction2022 extends LinearOpMode {
         // 0 is home and 1 is open
         Initialize_Vuforia();
         CenterSwivel();
-        displayinfo(index);
+        //displayinfo(index);
         waitForStart();
         telemetry.update();
         Cone_Delivery();
@@ -231,7 +246,8 @@ public class AutonLeftJunction2022 extends LinearOpMode {
     /**
      * Display info (using telemetry) for a recognized object.
      */
-    private void displayinfo(int i) {
+/**
+ * private void displayinfo(int i) {
         // Display label info.
         // Display the label and index number for the recognition.
         telemetry.addData("label " + i, recognition.getLabel());
@@ -256,7 +272,7 @@ public class AutonLeftJunction2022 extends LinearOpMode {
         }
         callStop();
     }
-
+    */
     /**
      * Describe this function...
      */
@@ -270,7 +286,7 @@ public class AutonLeftJunction2022 extends LinearOpMode {
      */
     private void timeLift(double liftTime, double liftSpeed) {
         lift.setPower(liftSpeed);
-        sleep(liftTime * 1000);
+        sleep((long) (liftTime * 1000));
         lift.setPower(0.1);
         sleep(500);
     }
